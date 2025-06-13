@@ -188,6 +188,10 @@ export class LabelService {
       map((response) => {
         this.ensureRepoHasRequiredLabels(response, LabelService.getRequiredLabelsAsArray(needAllLabels));
         return response;
+      }),
+      map((response) => {
+        this.removeExtraLabelsFromRepo(response, LabelService.getRequiredLabelsAsArray(needAllLabels));
+        return response;
       })
     );
   }
@@ -295,6 +299,30 @@ export class LabelService {
         }
       } else {
         throw new Error('Unexpected error: the repo has multiple labels with the same name ' + label.getFormattedName());
+      }
+    });
+  }
+
+  /**
+   * Removes all the extra labels which are not required from the current repo.
+   * Compares all the exisiting labels in the repo against the required labels. If a label is not found among the required
+   * labels, delete it from the current repo.
+   * @param actualLabels - labels in the repo
+   * @param requiredLabels - required labels
+   */
+  private removeExtraLabelsFromRepo(actualLabels: Label[], requiredLabels: Label[]): void {
+    actualLabels.forEach((label) => {
+      //find a label in the requiredLabels that has the same name as the existing labels.
+      const matchedRequiredLabels = requiredLabels.filter((requiredLabel) => requiredLabel.getFormattedName() === label.getFormattedName());
+
+      if (matchedRequiredLabels.length === 0) {
+        //It is not the same as any any required labels, delete this label from current repo
+        this.githubService.deleteLabel(label);
+      } else if (matchedRequiredLabels.length === 1) {
+        // a match is found in the required label -> do nothing
+      } else {
+        //multiple corresponding labels have been found in requiredLabels
+        throw new Error('unexpected error: the required labels has multiple labels of the same name: ' + label.getFormattedName());
       }
     });
   }

@@ -34,6 +34,7 @@ import { ERRORCODE_NOT_FOUND, ErrorHandlingService } from './error-handling.serv
 import { LoggingService } from './logging.service';
 import { GithubRestIssue } from '../models/github/github-rest-issue';
 import { createOAuthUserAuth } from '@octokit/auth-oauth-user';
+import { Label } from '../models/label.model';
 
 const { Octokit } = require('@octokit/rest');
 const CATCHER_ORG = 'CATcher-org';
@@ -352,6 +353,14 @@ export class GithubService {
    */
   createLabel(formattedLabelName: string, labelColor: string): void {
     octokit.issues.createLabel({ owner: ORG_NAME, repo: REPO, name: formattedLabelName, color: labelColor });
+  }
+
+  /**
+   * Deletes a label in the current repository.
+   * @param label - label to be deleted.
+   */
+  deleteLabel(label: Label): void {
+    octokit.issues.deleteLabel({ owner: ORG_NAME, repo: REPO, name: label.getFormattedName() });
   }
 
   /**
