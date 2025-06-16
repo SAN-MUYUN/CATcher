@@ -7,10 +7,11 @@ import { Issue } from '../../core/models/issue.model';
 import { IssueService } from '../../core/services/issue.service';
 import { paginateData } from './issue-paginator';
 import { getSortedData } from './issue-sorter';
-import { applySearchFilter } from './search-filter';
+import { applyLabelFilter, applySearchFilter } from './search-filter';
 
 export class IssuesDataTable extends DataSource<Issue> {
   private filterChange = new BehaviorSubject('');
+  private filterLabelChange = new BehaviorSubject('None');
   private teamFilterChange = new BehaviorSubject('');
   private issuesSubject = new BehaviorSubject<Issue[]>([]);
   private issueSubscription: Subscription;
@@ -39,6 +40,7 @@ export class IssuesDataTable extends DataSource<Issue> {
 
   disconnect() {
     this.filterChange.complete();
+    this.filterLabelChange.complete();
     this.teamFilterChange.complete();
     this.issuesSubject.complete();
     this.issueSubscription.unsubscribe();
@@ -51,6 +53,7 @@ export class IssuesDataTable extends DataSource<Issue> {
       this.paginator.page,
       this.sort.sortChange,
       this.filterChange,
+      this.filterLabelChange,
       this.teamFilterChange
     ];
 
@@ -65,6 +68,7 @@ export class IssuesDataTable extends DataSource<Issue> {
           data = getSortedData(this.sort, data);
           data = this.getFilteredTeamData(data);
           data = applySearchFilter(this.filter, this.displayedColumn, this.issueService, data);
+          data = applyLabelFilter(this.filterLabel, data);
           data = paginateData(this.paginator, data);
 
           return data;
@@ -81,6 +85,14 @@ export class IssuesDataTable extends DataSource<Issue> {
 
   set filter(filter: string) {
     this.filterChange.next(filter);
+  }
+
+  get filterLabel(): string {
+    return this.filterLabelChange.value;
+  }
+
+  set filterLabel(labelValue: string) {
+    this.filterLabelChange.next(labelValue);
   }
 
   get teamFilter(): string {
