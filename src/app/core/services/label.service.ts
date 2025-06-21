@@ -312,16 +312,16 @@ export class LabelService {
    */
   private removeExtraLabelsFromRepo(actualLabels: Label[], requiredLabels: Label[]): void {
     actualLabels.forEach((label) => {
-      //find a label in the requiredLabels that has the same name as the existing labels.
+      // Find a label in the requiredLabels that has the same name as the existing labels
       const matchedRequiredLabels = requiredLabels.filter((requiredLabel) => requiredLabel.getFormattedName() === label.getFormattedName());
 
       if (matchedRequiredLabels.length === 0) {
-        //It is not the same as any any required labels, delete this label from current repo
+        // It is not the same as any any required labels, delete this label from current repo
         this.githubService.deleteLabel(label);
       } else if (matchedRequiredLabels.length === 1) {
-        // a match is found in the required label -> do nothing
+        // A match is found in the required label -> do nothing
       } else {
-        //multiple corresponding labels have been found in requiredLabels
+        // Multiple corresponding labels have been found in requiredLabels
         throw new Error('unexpected error: the required labels has multiple labels of the same name: ' + label.getFormattedName());
       }
     });
