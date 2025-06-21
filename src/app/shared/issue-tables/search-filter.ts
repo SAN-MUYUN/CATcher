@@ -1,3 +1,4 @@
+import { Label } from '../../core/models/label.model';
 import { Issue } from '../../core/models/issue.model';
 import { IssueService } from '../../core/services/issue.service';
 import { TABLE_COLUMNS } from './issue-tables-columns';
@@ -39,6 +40,21 @@ export function applySearchFilter(filter: string, displayedColumn: string[], iss
   return result;
 }
 
+export function applyLabelFilter(filterLabelValue: string, data: Issue[]) {
+  console.log(filterLabelValue);
+  if (filterLabelValue === 'None') {
+    return data;
+  }
+  const result = data.slice().filter((issue: Issue) => {
+    if (mathSeverity(issue, filterLabelValue)) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+  return result;
+}
+
 function containsSearchKey(item: string, searchKey: string): boolean {
   return item.indexOf(searchKey) !== -1;
 }
@@ -64,4 +80,8 @@ function matchesTitle(issue: Issue, searchKey: string): boolean {
 function matchesOtherColumns(issue: Issue, column: string, searchKey: string): boolean {
   const searchStr = String(issue[column]).toLowerCase();
   return containsSearchKey(searchStr, searchKey);
+}
+
+function mathSeverity(issue: Issue, labelValue: string) {
+  return issue.severity === labelValue;
 }
